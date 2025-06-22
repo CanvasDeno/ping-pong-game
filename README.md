@@ -9,6 +9,12 @@ This game is playable on your **PC or laptop only.**
 
 ### Changes you can add
 
+**Before you add changes:**
+**Remember to fork this repo** by going to your Git Client and **paste this command:**
+
+```git
+git clone https://github.com/CanvasDeno/ping-pong-game.git
+```
 * Mobile support
 * Pause button
 * Sound effects
