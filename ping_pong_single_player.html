@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ping Pong Game (Single Player)</title>
+  <style>
+    body {
+      background: #222;
+      color: #fff;
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: #000;
+      border: 2px solid #fff;
+    }
+    #score {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 2em;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="score">0 : 0</div>
+  <canvas id="game" width="800" height="500"></canvas>
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreDiv = document.getElementById('score');
+
+    // Game objects
+    const paddleWidth = 10, paddleHeight = 100, paddleGap = 20;
+    const ballSize = 16;
+    let leftY = canvas.height / 2 - paddleHeight / 2;
+    let rightY = canvas.height / 2 - paddleHeight / 2;
+    let leftSpeed = 0;
+    const paddleSpeed = 7;
+    let ballX = canvas.width / 2 - ballSize / 2;
+    let ballY = canvas.height / 2 - ballSize / 2;
+    let ballSpeedX = 6 * (Math.random() > 0.5 ? 1 : -1);
+    let ballSpeedY = (Math.random() * 4 + 2) * (Math.random() > 0.5 ? 1 : -1);
+    let scoreLeft = 0, scoreRight = 0;
+
+    function resetBall(dir = 1) {
+      ballX = canvas.width / 2 - ballSize / 2;
+      ballY = canvas.height / 2 - ballSize / 2;
+      ballSpeedX = 6 * dir;
+      ballSpeedY = (Math.random() * 4 + 2) * (Math.random() > 0.5 ? 1 : -1);
+    }
+
+    function draw() {
+      // background
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // center line
+      ctx.strokeStyle = '#fff';
+      ctx.setLineDash([10, 15]);
+      ctx.beginPath();
+      ctx.moveTo(canvas.width/2, 0);
+      ctx.lineTo(canvas.width/2, canvas.height);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // left paddle (player)
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(paddleGap, leftY, paddleWidth, paddleHeight);
+
+      // right paddle (AI)
+      ctx.fillRect(canvas.width - paddleGap - paddleWidth, rightY, paddleWidth, paddleHeight);
+
+      // ball
+      ctx.fillRect(ballX, ballY, ballSize, ballSize);
+    }
+
+    function update() {
+      // Move player's paddle
+      leftY += leftSpeed;
+      leftY = Math.max(0, Math.min(canvas.height - paddleHeight, leftY));
+
+      // Simple AI for right paddle
+      let aiCenter = rightY + paddleHeight / 2;
+      let ballCenter = ballY + ballSize / 2;
+      let aiSpeed = 5;
+      if (aiCenter < ballCenter - 10) {
+        rightY += aiSpeed;
+      } else if (aiCenter > ballCenter + 10) {
+        rightY -= aiSpeed;
+      }
+      rightY = Math.max(0, Math.min(canvas.height - paddleHeight, rightY));
+
+      // Move ball
+      ballX += ballSpeedX;
+      ballY += ballSpeedY;
+
+      // Top/bottom collision
+      if (ballY <= 0 || ballY + ballSize >= canvas.height) {
+        ballSpeedY *= -1;
+      }
+
+      // Left paddle collision (player)
+      if (
+        ballX <= paddleGap + paddleWidth &&
+        ballY + ballSize >= leftY &&
+        ballY <= leftY + paddleHeight
+      ) {
+        ballX = paddleGap + paddleWidth;
+        ballSpeedX *= -1;
+        let delta = (ballY + ballSize/2) - (leftY + paddleHeight/2);
+        ballSpeedY += delta * 0.25;
+      }
+
+      // Right paddle collision (AI)
+      if (
+        ballX + ballSize >= canvas.width - paddleGap - paddleWidth &&
+        ballY + ballSize >= rightY &&
+        ballY <= rightY + paddleHeight
+      ) {
+        ballX = canvas.width - paddleGap - paddleWidth - ballSize;
+        ballSpeedX *= -1;
+        let delta = (ballY + ballSize/2) - (rightY + paddleHeight/2);
+        ballSpeedY += delta * 0.25;
+      }
+
+      // Player miss
+      if (ballX < 0) {
+        scoreRight++;
+        updateScore();
+        resetBall(1);
+      }
+
+      // AI miss
+      if (ballX + ballSize > canvas.width) {
+        scoreLeft++;
+        updateScore();
+        resetBall(-1);
+      }
+    }
+
+    function updateScore() {
+      scoreDiv.textContent = `${scoreLeft} : ${scoreRight}`;
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Controls (player: ArrowUp/ArrowDown)
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowUp') leftSpeed = -paddleSpeed;
+      if (e.key === 'ArrowDown') leftSpeed = paddleSpeed;
+    });
+    document.addEventListener('keyup', e => {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') leftSpeed = 0;
+    });
+
+    // Start
+    updateScore();
+    gameLoop();
+  </script>
+</body>
+</html>
