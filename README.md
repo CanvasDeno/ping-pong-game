@@ -1,5 +1,6 @@
 # Ping Pong Game
 A game coded with Github Copilot. This is simple ping pong game created with HTML, CSS and JavaScript and you can play this on the web.
+Copilot Chat [link](https://github.com/copilot/share/884c118c-4124-84d3-9811-f60ec008486c)
 
 ### Get started
 Use the **arrow keys left and right on your Keyboard to move the paddle.** Make the paddle touch the ball or **else you are going to lose the game.**
